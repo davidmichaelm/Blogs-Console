@@ -32,6 +32,9 @@ namespace BlogsConsole
                         CreateNewPost();
                         break;
                     case "4":
+                        DisplayPosts();
+                        break;
+                    case "5":
                         keepRunning = false;
                         break;
                 }
@@ -62,14 +65,7 @@ namespace BlogsConsole
             {
                 var blogs = db.Blogs.ToList();
                 
-                var index = 1;
-                var validChoices = new Dictionary<string, string>();
-                foreach (var blog in blogs)
-                {
-                    validChoices.Add(index.ToString(), blog.Name);
-                    index++;
-                }
-                var userChoice = _userInterface.GetBlogChoice(blogs, validChoices);
+                var userChoice = _userInterface.GetBlogChoice(blogs);
                 var chosenBlog = db.Blogs.First(b => b.BlogId.ToString() == userChoice);
 
                 var title = _userInterface.GetPostTitle();
@@ -83,6 +79,28 @@ namespace BlogsConsole
                 };
                 
                 db.AddPost(post);
+            }
+        }
+
+        private void DisplayPosts()
+        {
+            using (var db = new BloggingContext())
+            {
+                var blogs = db.Blogs.Include("Posts").ToList();
+
+                var userChoice = _userInterface.GetPostDisplayChoice(blogs);
+                if (userChoice == "0")
+                {
+                    foreach (var blog in blogs)
+                    {
+                        _userInterface.DisplayBlogPosts(blog);
+                    }
+                }
+                else
+                {
+                    var chosenBlog = db.Blogs.First(b => b.BlogId.ToString() == userChoice);
+                    _userInterface.DisplayBlogPosts(chosenBlog);
+                }
             }
         }
     }
