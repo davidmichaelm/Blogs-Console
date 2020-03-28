@@ -55,7 +55,7 @@ namespace BlogsConsole
             ShowAllBlogs(blogList);
 
             var userChoice = Console.ReadLine();
-            while (!validChoices.ContainsKey(userChoice))
+            while (userChoice!= null && !validChoices.ContainsKey(userChoice))
             {
                 userChoice = Console.ReadLine();
             }

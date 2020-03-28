@@ -70,7 +70,7 @@ namespace BlogsConsole
                     index++;
                 }
                 var userChoice = _userInterface.GetBlogChoice(blogs, validChoices);
-                var chosenBlog = db.Blogs.First(b => b.Name == userChoice);
+                var chosenBlog = db.Blogs.First(b => b.BlogId.ToString() == userChoice);
 
                 var title = _userInterface.GetPostTitle();
                 var content = _userInterface.GetPostContent();
