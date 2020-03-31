@@ -58,13 +58,13 @@ namespace BlogsConsole
             ShowAllBlogs(blogList);
 
             var userChoice = Console.ReadLine();
-            while (userChoice != null && !validChoices.ContainsKey(userChoice))
+            while (userChoice == null || !validChoices.ContainsKey(userChoice))
             {
                 Console.WriteLine("Please enter a valid blog number:");
                 userChoice = Console.ReadLine();
             }
 
-            return userChoice;
+            return validChoices[userChoice];
         }
 
         public string GetPostTitle()
@@ -103,13 +103,13 @@ namespace BlogsConsole
             ShowAllBlogs(blogList);
 
             var userChoice = Console.ReadLine();
-            while (userChoice != null && !validChoices.ContainsKey(userChoice))
+            while (userChoice == null || !validChoices.ContainsKey(userChoice))
             {
                 Console.WriteLine("Please enter a valid blog number:");
                 userChoice = Console.ReadLine();
             }
 
-            return userChoice;
+            return validChoices[userChoice];
         }
 
         public void DisplayBlogPosts(Blog blog)
@@ -121,7 +121,12 @@ namespace BlogsConsole
                 {
                     Console.WriteLine("Title: " + post.Title);
                     Console.WriteLine("Content: " + post.Content);
+                    Console.WriteLine();
                 }
+            }
+            else
+            {
+                Console.WriteLine("0 posts were returned\n");
             }
         }
 

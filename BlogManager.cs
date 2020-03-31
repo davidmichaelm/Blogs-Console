@@ -66,7 +66,7 @@ namespace BlogsConsole
                 var blogs = db.Blogs.ToList();
                 
                 var userChoice = _userInterface.GetBlogChoice(blogs);
-                var chosenBlog = db.Blogs.First(b => b.BlogId.ToString() == userChoice);
+                var chosenBlog = blogs.First(b => b.Name == userChoice);
 
                 var title = _userInterface.GetPostTitle();
                 var content = _userInterface.GetPostContent();
@@ -89,16 +89,19 @@ namespace BlogsConsole
                 var blogs = db.Blogs.Include("Posts").ToList();
 
                 var userChoice = _userInterface.GetPostDisplayChoice(blogs);
-                if (userChoice == "0")
+                if (userChoice == "All blogs")
                 {
                     foreach (var blog in blogs)
                     {
-                        _userInterface.DisplayBlogPosts(blog);
+                        if (blog.Posts.Count > 0)
+                        {
+                            _userInterface.DisplayBlogPosts(blog);
+                        }
                     }
                 }
                 else
                 {
-                    var chosenBlog = db.Blogs.First(b => b.BlogId.ToString() == userChoice);
+                    var chosenBlog = blogs.First(b => b.Name == userChoice);
                     _userInterface.DisplayBlogPosts(chosenBlog);
                 }
             }
