@@ -19,7 +19,7 @@ namespace BlogsConsole
             }
             catch (Exception ex)
             {
-                logger.Error(ex.Message);
+                logger.Error(ex, ex.Message);
             }
             logger.Info("Program ended");
         }

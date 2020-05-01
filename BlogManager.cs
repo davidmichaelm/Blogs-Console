@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BlogsConsole.Models;
@@ -18,8 +19,9 @@ namespace BlogsConsole
             var keepRunning = true;
             while (keepRunning)
             {
-                _userInterface.ShowMenu();
-                var menuInput = _userInterface.GetMenuInput();
+                _userInterface.DisplayMenu();
+                var validInputs = new List<string> { "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+                var menuInput = _userInterface.GetMenuInput(validInputs);
                 switch (menuInput)
                 {
                     case "1":
@@ -35,6 +37,18 @@ namespace BlogsConsole
                         DisplayPosts();
                         break;
                     case "5":
+                        EditBlog();
+                        break;
+                    case "6":
+                        EditPost();
+                        break;
+                    case "7":
+                        DeleteBlog();
+                        break;
+                    case "8":
+                        DeletePost();
+                        break;
+                    case "9":
                         keepRunning = false;
                         break;
                 }
@@ -45,7 +59,7 @@ namespace BlogsConsole
         {
             using (var db = new BloggingContext())
             {
-                _userInterface.ShowAllBlogs(db.Blogs.ToList());
+                _userInterface.DisplayBlogs(db.Blogs.ToList());
             }
         }
 
@@ -65,8 +79,7 @@ namespace BlogsConsole
             {
                 var blogs = db.Blogs.ToList();
                 
-                var userChoice = _userInterface.GetBlogChoice(blogs);
-                var chosenBlog = blogs.First(b => b.Name == userChoice);
+                var blog = _userInterface.GetExistingBlogChoice(blogs);
 
                 var title = _userInterface.GetPostTitle();
                 var content = _userInterface.GetPostContent();
@@ -75,7 +88,7 @@ namespace BlogsConsole
                 {
                     Title = title,
                     Content = content,
-                    Blog = chosenBlog
+                    Blog = blog
                 };
                 
                 db.AddPost(post);
@@ -88,23 +101,82 @@ namespace BlogsConsole
             {
                 var blogs = db.Blogs.Include("Posts").ToList();
 
-                var userChoice = _userInterface.GetPostDisplayChoice(blogs);
-                if (userChoice == "All blogs")
+                var chosenBlogs = _userInterface.GetExistingBlogListChoice(blogs);
+                chosenBlogs = chosenBlogs.Where(b => b.Posts.Count > 0).ToList();
+                _userInterface.DisplayBlogPosts(chosenBlogs);
+            }
+        }
+
+        private void EditBlog()
+        {
+            using (var db = new BloggingContext())
+            {
+                var blogs = db.Blogs.Include("Posts").ToList();
+
+                var blog = _userInterface.GetExistingBlogChoice(blogs);
+                var name = _userInterface.GetBlogName();
+
+                db.EditBlog(blog.BlogId, name);
+            }
+        }
+        
+        private void EditPost()
+        {
+            using (var db = new BloggingContext())
+            {
+                var blogs = db.Blogs.Include("Posts").ToList();
+                var postId = _userInterface.GetExistingPostIdChoice(blogs);
+                if (postId == -1) return; // No posts found
+                
+                var title = _userInterface.GetPostTitle();
+                var content = _userInterface.GetPostContent();
+                
+                db.EditPost(postId, title, content);
+            }
+        }
+        
+        private void DeleteBlog()
+        {
+            using (var db = new BloggingContext())
+            {
+                var blogs = db.Blogs.ToList();
+
+                var blog = _userInterface.GetExistingBlogChoice(blogs);
+
+                if (_userInterface.GetDeleteConfirmation(blog))
                 {
-                    foreach (var blog in blogs)
-                    {
-                        if (blog.Posts.Count > 0)
-                        {
-                            _userInterface.DisplayBlogPosts(blog);
-                        }
-                    }
+                    db.RemoveBlog(blog);
+                    _userInterface.showMessage("Blog deleted");
                 }
                 else
                 {
-                    var chosenBlog = blogs.First(b => b.Name == userChoice);
-                    _userInterface.DisplayBlogPosts(chosenBlog);
+                    _userInterface.showMessage("Blog not deleted");
+                }
+
+            }
+        }
+        
+        private void DeletePost()
+        {
+            using (var db = new BloggingContext())
+            {
+                var blogs = db.Blogs.Include("Posts").ToList();
+                var postId = _userInterface.GetExistingPostIdChoice(blogs);
+                if (postId == -1) return; // No posts found
+
+                var post = db.Posts.First(p => p.PostId == postId);
+                
+                if (_userInterface.GetDeleteConfirmation(post))
+                {
+                    db.RemovePost(post);
+                    _userInterface.showMessage("Post deleted");
+                }
+                else
+                {
+                    _userInterface.showMessage("Post not deleted");
                 }
             }
         }
+        
     }
 }
